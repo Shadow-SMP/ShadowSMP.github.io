@@ -2,17 +2,249 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow SMP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow SMP | Official</title>
     <style>
-        body { background: #0a0a0c; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { text-align: center; padding: 50px; border: 2px solid #8a2be2; border-radius: 20px; box-shadow: 0 0 20px #8a2be2; }
-        h1 { font-size: 3rem; background: linear-gradient(to right, #8a2be2, #4b0082); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        body { 
+            background: #0a0a0c; 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+        
+        .container { 
+            background: #121216; 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 2px solid #8a2be2; 
+            text-align: center; 
+            width: 90%; 
+            max-width: 500px; 
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.2); 
+            position: relative; 
+            transition: all 0.5s ease;
+        }
+        
+        h1 { 
+            color: #8a2be2; 
+            font-size: 2.5em; 
+            text-transform: uppercase; 
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.6), 2px 2px #000; 
+            margin-bottom: 5px; 
+        }
+
+        .user-badge { color: #8a2be2; font-size: 0.9em; margin-bottom: 10px; font-style: italic; font-weight: bold; }
+
+        /* Login-Overlay */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: #121216; padding: 40px 30px; border-radius: 20px; border: 2px solid #8a2be2; width: 90%; max-width: 400px; position: relative; text-align: center; }
+        .close-x { position: absolute; top: 15px; right: 20px; color: #8a2be2; font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .close-x:hover { color: white; transform: scale(1.2); }
+
+        /* Status & IP */
+        .status-wrapper { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-weight: bold; }
+        .status-dot { 
+            height: 10px; 
+            width: 10px; 
+            background-color: #00ff7f; 
+            border-radius: 50%; 
+            display: inline-block; 
+            margin-right: 8px; 
+            box-shadow: 0 0 12px #00ff7f; 
+            animation: pulse 1.5s infinite; 
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .ip { 
+            background: #000; 
+            padding: 15px; 
+            font-family: monospace; 
+            border-radius: 10px; 
+            color: #8a2be2; 
+            margin-bottom: 25px; 
+            border: 1px solid #8a2be2; 
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .btn { display: inline-block; background: #8a2be2; color: white; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; cursor: pointer; border: none; width: 100%; box-sizing: border-box; margin-bottom: 10px; transition: 0.2s; font-size: 1em; }
+        .btn:hover { transform: scale(1.02); background: #a044ff; box-shadow: 0 0 15px rgba(138, 43, 226, 0.4); }
+        .btn-apply { background: #4b0082; color: white; margin-top: 10px; }
+        .btn-logout { background: transparent; color: #ff4444; border: 1px solid #ff4444; margin-top: 20px; }
+        .btn-logout:hover { background: #ff4444; color: white; }
+
+        .link-web { display: block; color: #888; text-decoration: none; font-size: 0.9em; margin: 15px 0; transition: 0.3s; cursor: pointer; }
+        .link-web:hover { color: #8a2be2; text-decoration: underline; }
+
+        /* Inhaltsverzeichnis */
+        .content-list { list-style: none; padding: 0; margin: 20px 0; }
+        .content-item {
+            background: #1a1a20; margin-bottom: 15px; padding: 20px; border-radius: 12px; border-left: 5px solid #8a2be2;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); text-align: left; overflow: hidden; max-height: 65px;
+        }
+        .content-item.active { background: #8a2be2 !important; max-height: 1000px; border-left-color: white; transform: scale(1.02); }
+        .content-item h3 { margin: 0; color: #8a2be2; font-size: 1.2em; }
+        .content-item.active h3 { color: #fff; }
+        .short-desc { margin-top: 8px; font-size: 0.9em; color: #aaa; }
+        .content-item.active .short-desc { display: none; }
+        .detail-text { display: none; color: #fff; font-size: 1em; line-height: 1.5; margin-top: 10px; animation: fadeIn 0.5s forwards; }
+        .content-item.active .detail-text { display: block; }
+        
+        /* Social Media & Server Detail */
+        .social-link { display: block; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 8px; text-decoration: none; color: #fff; font-weight: bold; transition: 0.3s; border-left: 4px solid #8a2be2; }
+        .social-link:hover { background: rgba(138, 43, 226, 0.2); transform: translateX(5px); }
+        .social-link.upcoming { color: #666; border-left-color: #444; cursor: default; }
+        .tag { font-size: 0.7em; background: #333; color: #8a2be2; padding: 2px 6px; border-radius: 4px; margin-left: 10px; text-transform: uppercase; border: 1px solid #8a2be2; }
+
+        .staff-group, .server-modi { margin-bottom: 15px; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .mode-title { font-weight: bold; text-transform: uppercase; font-size: 0.9em; display: block; color: #a044ff; }
+        .rank { font-weight: bold; text-transform: uppercase; font-size: 0.85em; display: block; }
+        .rank.owner { color: #ff0000; text-shadow: 0 0 5px rgba(255,0,0,0.3); } 
+        .rank.admin { color: #ffaa00; } 
+        .rank.mod { color: #55ff55; } 
+        .rank.dev { color: #5555ff; } 
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden { display: none; }
+
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #1a1a20; color: white; box-sizing: border-box; font-family: inherit; }
+        textarea { resize: none; min-height: 110px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>SHADOW SMP</h1>
-        <p>Website lädt bald...</p>
+
+    <div class="overlay" id="auth-overlay">
+        <div class="login-box" id="login-form">
+            <span class="close-x" onclick="closeAuth()">×</span>
+            <h1>Shadow Login</h1>
+            <input type="text" id="login-user" placeholder="Benutzername">
+            <input type="password" id="login-pass" placeholder="Passwort">
+            <button class="btn" onclick="handleLogin()">Eintreten</button>
+            <p>Neu in den Schatten? <span style="color:#8a2be2; cursor:pointer;" onclick="toggleAuth('reg')">Registrieren</span></p>
+        </div>
+        <div class="login-box hidden" id="register-form">
+            <span class="close-x" onclick="closeAuth()">×</span>
+            <h1>Beitreten</h1>
+            <input type="text" id="reg-user" placeholder="Wunsch-Name">
+            <input type="password" id="reg-pass" placeholder="Passwort">
+            <button class="btn" onclick="handleRegister()">Account erstellen</button>
+            <p>Bereits Mitglied? <span style="color:#8a2be2; cursor:pointer;" onclick="toggleAuth('log')">Zum Login</span></p>
+        </div>
     </div>
+
+    <div class="container" id="main-page">
+        <h1>Shadow SMP</h1>
+        <div id="user-greeting" class="user-badge hidden"></div>
+        
+        <div class="status-wrapper">
+            <span class="status-dot"></span>
+            <span style="color: #00ff7f;">Schattenwelt online</span>
+        </div>
+        <div class="ip">SHADOW-SMP.NET</div>
+        
+        <button class="btn btn-apply" onclick="showPage('apply-page')">🌑 Jetzt bewerben</button>
+        <span class="link-web" onclick="showPage('info-page')">📖 Lore & Informationen</span>
+        
+        <button id="guest-login-btn" class="btn" style="background: transparent; color: #8a2be2; border: 1px solid #8a2be2; margin-top: 10px;" onclick="openAuth()">Anmelden / Registrieren</button>
+        <button id="user-logout-btn" class="btn btn-logout hidden" onclick="handleLogout()">Ausloggen</button>
+    </div>
+
+    <div class="container hidden" id="info-page">
+        <h1>Informationen</h1>
+        <p>Willkommen in der Dunkelheit</p>
+        <ul class="content-list">
+            <li class="content-item" onclick="toggleDetail(this)">
+                <h3>Die Lore</h3>
+                <p class="short-desc">Die Geschichte von Shadow SMP.</p>
+                <div class="detail-text">
+                    Shadow SMP ist aus den Trümmern alter Welten entstanden. Hier zählen nicht nur Ressourcen, sondern Macht und Bündnisse. Seit der Gründung durch die Schattenfürsten im Jahr 2026 kämpfen Spieler um die Vorherrschaft in einer Welt, die niemals schläft. Werde Teil der Legende oder versinke in der Vergessenheit.
+                </div>
+            </li>
+
+            <li class="content-item" onclick="toggleDetail(this)">
+                <h3>Server-Features</h3>
+                <p class="short-desc">Was uns einzigartig macht.</p>
+                <div class="detail-text">
+                    <div class="server-modi">
+                        <span class="mode-title">🌑 Shadow Survival</span>
+                        <span class="mode-desc">Hardcore-Elemente, Custom Enchants und ein dunkles Wirtschaftssystem.</span>
+                    </div>
+                    <div class="server-modi">
+                        <span class="mode-title">⚔️ Clan Wars</span>
+                        <span class="mode-desc">Gründe deinen Clan und erobere Gebiete in wöchentlichen Events.</span>
+                    </div>
+                    <div class="server-modi">
+                        <span class="mode-title">🔮 Mystery Quests</span>
+                        <span class="mode-desc">Einzigartige Story-Quests mit seltenen Belohnungen.</span>
+                    </div>
+                </div>
+            </li>
+
+            <li class="content-item" onclick="toggleDetail(this)">
+                <h3>Social Media</h3>
+                <p class="short-desc">Verbinde dich mit uns.</p>
+                <div class="detail-text">
+                    <a href="https://discord.gg/shadowsmp" target="_blank" class="social-link">💬 Shadow Discord</a>
+                    <a href="https://youtube.com/@shadowsmp" target="_blank" class="social-link">🎬 YouTube Kanal</a>
+                    <div class="social-link upcoming">🎵 TikTok <span class="tag">In Arbeit</span></div>
+                </div>
+            </li>
+
+            <li class="content-item" onclick="toggleDetail(this)">
+                <h3>Das Team</h3>
+                <p class="short-desc">Die Hüter der Schatten.</p>
+                <div class="detail-text">
+                    <div class="staff-group"><span class="rank owner">Schattenfürst</span> René, Tobias</div>
+                    <div class="staff-group"><span class="rank admin">Administrator</span> Sebastian</div>
+                    <div class="staff-group"><span class="rank dev">Developer</span> <i>Vakant</i></div>
+                    <div class="staff-group"><span class="rank mod">Moderator</span> Jonas, Ingemar</div>
+                </div>
+            </li>
+        </ul>
+        <button class="btn" style="background:#333; color:white;" onclick="showPage('main-page')">Zurück</button>
+    </div>
+
+    <div class="container hidden" id="apply-page">
+        <h1>Bewerbung</h1>
+        <div id="form-container">
+            <form id="apply-form" action="https://formspree.io/f/xwvnewol" method="POST">
+                <input type="text" name="name" placeholder="Echter Name" required>
+                <input type="text" name="mc_name" placeholder="Minecraft Name" required>
+                <input type="number" name="age" placeholder="Alter" required>
+                <select name="position" required>
+                    <option value="" disabled selected>Bewirb dich als...</option>
+                    <option value="Moderator">Moderator</option>
+                    <option value="Developer">Developer</option>
+                    <option value="Builder">Builder</option>
+                    <option value="Designer">Designer</option>
+                </select>
+                <textarea name="message" placeholder="Deine Erfahrung & warum du?" required></textarea>
+                <button type="submit" id="submit-btn" class="btn">Bewerbung absenden</button>
+            </form>
+            <button class="btn" style="background:#333; color:white;" onclick="showPage('main-page')">Abbrechen</button>
+        </div>
+        <div id="success-box" class="hidden">
+            <p style="color: #00ff7f; font-weight: bold;">Deine Nachricht wurde in die Schatten übertragen!</p>
+            <button class="btn" onclick="location.reload()">Zurück zum Start</button>
+        </div>
+    </div>
+
+    <script>
+        function showPage(p) { document.querySelectorAll('.container').forEach(c => c.classList.add('hidden')); document.getElementById(p).classList.remove('hidden'); }
+        function toggleDetail(e) { const a = e.classList.contains('active'); document.querySelectorAll('.content-item').forEach(i => i.classList.remove('active')); if(!a) e.classList.add('active'); }
+        function closeAuth() { document.getElementById('auth-overlay').classList.add('hidden'); }
+        function openAuth() { document.getElementById('auth-overlay').classList.remove('hidden'); }
+        function toggleAuth(t) { document.getElementById('login-form').classList.toggle('hidden', t==='reg'); document.getElementById('register-form').classList.toggle('hidden', t==='log'); }
+        function handleRegister() { const u=document.getElementById('reg-user').value, p=document.getElementById('reg-pass').value; if(u&&p){localStorage.setItem('shadow_u',u);localStorage.setItem('shadow_p',p);alert("Account in den Schatten erstellt!");toggleAuth('log');}}
+        function handleLogin() { const u=document.getElementById('login-user').value, p=document.getElementById('login-pass').value; if(u===localStorage.getItem('shadow_u')&&p===localStorage.getItem('shadow_p')){const g=document.getElementById('user-greeting');g.innerText="Willkommen, "+u;g.classList.remove('hidden');document.getElementById('guest-login-btn').classList.add('hidden');document.getElementById('user-logout-btn').classList.remove('hidden');closeAuth();}else{alert("Zugriff verweigert!");}}
+        function handleLogout() { document.getElementById('user-greeting').classList.add('hidden'); document.getElementById('guest-login-btn').classList.remove('hidden'); document.getElementById('user-logout-btn').classList.add('hidden'); alert("Du hast die Schatten verlassen."); }
+        document.getElementById("apply-form").addEventListener("submit",function(e){e.preventDefault();const b=document.getElementById("submit-btn");b.disabled=true;b.innerText="Übertragung...";fetch(this.action,{method:'POST',body:new FormData(this),headers:{'Accept':'application/json'}}).then(()=>{document.getElementById('form-container').classList.add('hidden');document.getElementById('success-box').classList.remove('hidden');});});
+    </script>
 </body>
 </html>
